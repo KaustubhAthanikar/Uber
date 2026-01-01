@@ -159,3 +159,169 @@ curl -X POST http://localhost:3000/users/login \
 ### Notes
 - The endpoint uses `express-validator` for request validation and the model stores hashed passwords. The password field is not returned in responses.
 
+---
+
+## Profile
+
+### Endpoint
+- `GET /users/profile`
+
+### Description
+Returns the currently authenticated user's profile. Requires a valid JWT token (sent as a cookie or in the `Authorization` header as `Bearer <token>`).
+
+### Authentication
+- Required: the route is protected by authentication middleware which populates `req.user`.
+
+### Responses
+- `200 OK`
+  - Success. Returns the authenticated user's object (password will not be present):
+
+```json
+{
+  "_id": "<user-id>",
+  "fullname": { "firstname": "Jane", "lastname": "Doe" },
+  "email": "jane.doe@example.com",
+  "socketId": null
+}
+```
+
+- `401 Unauthorized`
+  - Missing or invalid token. Example:
+
+```json
+{
+  "message": "Authentication required"
+}
+```
+
+---
+
+## Logout
+
+### Endpoint
+- `GET /users/logout`
+
+### Description
+Logs out the authenticated user by clearing the auth cookie and blacklisting the token so it cannot be used again until it expires. Requires authentication.
+
+### Authentication
+- Required: token must be provided (cookie or `Authorization` header).
+
+### Responses
+- `200 OK`
+  - Success. Example:
+
+```json
+{
+  "message": "Logged out successfully"
+}
+```
+
+- `401 Unauthorized`
+  - Missing or invalid token. Example:
+
+```json
+{
+  "message": "Authentication required"
+}
+```
+
+- `500 Internal Server Error`
+  - Unexpected server error during logout or token blacklist creation.
+
+### Notes
+- The server stores blacklisted tokens in a collection with a 1-day TTL to prevent reuse for the token lifetime.
+
+---
+
+## Captains
+
+### Register Captain
+
+#### Endpoint
+- `POST /captains/register`
+
+#### Description
+Registers a new captain. The endpoint validates request data, hashes the password, creates the captain record, and returns a JWT token plus the created `captain` object (password is not returned).
+
+#### Request Headers
+- `Content-Type: application/json`
+
+#### Request Body (JSON)
+- `fullname` (object)
+  - `firstname`: string — required
+  - `lastname`: string — optional
+- `email`: string — required, valid email
+- `password`: string — required, minimum 6 characters
+- `vehicle` (object) — required
+  - `color`: string — required
+  - `plate`: string — required, unique
+  - `capacity`: integer — required, minimum 1
+  - `vehicleType`: string — required, one of `car`, `bike`, `auto`
+
+Example request body:
+
+```json
+{
+  "fullname": { "firstname": "John", "lastname": "Doe" },
+  "email": "john.doe@example.com",
+  "password": "secret123",
+  "vehicle": { "color": "red", "plate": "ABC123", "capacity": 4, "vehicleType": "car" }
+}
+```
+
+#### Validation Rules
+- `fullname.firstname` is required.
+- `email` must be a valid email and is unique.
+- `password` must be at least 6 characters.
+- `vehicle.color`, `vehicle.plate`, `vehicle.capacity`, and `vehicle.vehicleType` are required.
+- `vehicle.capacity` must be an integer >= 1.
+- `vehicle.vehicleType` must be one of `car`, `bike`, `auto`.
+
+If validation fails, the endpoint responds with status `400 Bad Request` and an `errors` array from `express-validator`.
+
+#### Responses
+- `201 Created`
+  - Success. Returns JSON with `message`, `captain`, and `token`:
+
+```json
+{
+  "message": "Captain registered successfully",
+  "captain": {
+    "_id": "<captain-id>",
+    "fullname": { "firstname": "John", "lastname": "Doe" },
+    "email": "john.doe@example.com",
+    "vehicle": { "color":"red","plate":"ABC123","capacity":4,"vehicleType":"car" },
+    "status": "inactive"
+  },
+  "token": "<jwt-token>"
+}
+```
+
+- `400 Bad Request`
+  - Validation failed or captain with email already exists. Example:
+
+```json
+{ "message": "Captain with this email already exists" }
+```
+
+- `500 Internal Server Error`
+  - Unexpected server error. Example:
+
+```json
+{ "error": "<error message>" }
+```
+
+#### Example curl
+
+```bash
+curl -X POST http://localhost:3000/captains/register \
+  -H "Content-Type: application/json" \
+  -d '{"fullname":{"firstname":"John","lastname":"Doe"},"email":"john.doe@example.com","password":"secret123","vehicle":{"color":"red","plate":"ABC123","capacity":4,"vehicleType":"car"}}'
+```
+
+#### Notes
+- `email` and `vehicle.plate` are stored as unique fields.
+- The model generates a JWT using `JWT_SECRET`; ensure it's set in environment variables.
+
+
