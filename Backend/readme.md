@@ -65,13 +65,7 @@ Note: the password field is not returned in the user object.
 - `500 Internal Server Error`
   - Unexpected server error.
 
-## Example curl
 
-```bash
-curl -X POST http://localhost:3000/users/register \
-  -H "Content-Type: application/json" \
-  -d '{"fullname":{"firstname":"Jane","lastname":"Doe"},"email":"jane.doe@example.com","password":"secret123"}'
-```
 
 ## Notes
 - The endpoint uses `express-validator` for request validation and the user model hashes the password before storing it.
@@ -148,13 +142,6 @@ If validation fails, the endpoint responds with status `400 Bad Request` and a J
 - `500 Internal Server Error`
   - Unexpected server error.
 
-### Example curl
-
-```bash
-curl -X POST http://localhost:3000/users/login \
-  -H "Content-Type: application/json" \
-  -d '{"email":"jane.doe@example.com","password":"secret123"}'
-```
 
 ### Notes
 - The endpoint uses `express-validator` for request validation and the model stores hashed passwords. The password field is not returned in responses.
@@ -248,41 +235,30 @@ Registers a new captain. The endpoint validates request data, hashes the passwor
 - `Content-Type: application/json`
 
 #### Request Body (JSON)
-- `fullname` (object)
-  - `firstname`: string — required
-  - `lastname`: string — optional
-- `email`: string — required, valid email
-- `password`: string — required, minimum 6 characters
-- `vehicle` (object) — required
-  - `color`: string — required
-  - `plate`: string — required, unique
-  - `capacity`: integer — required, minimum 1
-  - `vehicleType`: string — required, one of `car`, `bike`, `auto`
-
-Example request body:
+Below is the exact JSON body expected. Inline comments (//) indicate requirements and constraints.
 
 ```json
 {
-  "fullname": { "firstname": "John", "lastname": "Doe" },
-  "email": "john.doe@example.com",
-  "password": "secret123",
-  "vehicle": { "color": "red", "plate": "ABC123", "capacity": 4, "vehicleType": "car" }
+  "fullname": {
+    "firstname": "John", // required: non-empty string
+    "lastname": "Doe" // optional
+  },
+  "email": "john.doe@example.com", // required: valid email, unique
+  "password": "secret123", // required: min 6 characters
+  "vehicle": {
+    "color": "red", // required
+    "plate": "ABC123", // required: unique
+    "capacity": 4, // required: integer >= 1
+    "vehicleType": "car" // required: one of "car", "bike", "auto"
+  }
 }
 ```
 
-#### Validation Rules
-- `fullname.firstname` is required.
-- `email` must be a valid email and is unique.
-- `password` must be at least 6 characters.
-- `vehicle.color`, `vehicle.plate`, `vehicle.capacity`, and `vehicle.vehicleType` are required.
-- `vehicle.capacity` must be an integer >= 1.
-- `vehicle.vehicleType` must be one of `car`, `bike`, `auto`.
+> Note: The JSON block above uses inline comments for documentation; real requests must be valid JSON without comments.
 
-If validation fails, the endpoint responds with status `400 Bad Request` and an `errors` array from `express-validator`.
+#### Responses (JSON)
 
-#### Responses
-- `201 Created`
-  - Success. Returns JSON with `message`, `captain`, and `token`:
+Success (201 Created):
 
 ```json
 {
@@ -291,37 +267,42 @@ If validation fails, the endpoint responds with status `400 Bad Request` and an 
     "_id": "<captain-id>",
     "fullname": { "firstname": "John", "lastname": "Doe" },
     "email": "john.doe@example.com",
-    "vehicle": { "color":"red","plate":"ABC123","capacity":4,"vehicleType":"car" },
+    "vehicle": { "color": "red", "plate": "ABC123", "capacity": 4, "vehicleType": "car" },
     "status": "inactive"
   },
-  "token": "<jwt-token>"
+  "token": "<jwt-token>" // JWT token for authenticated requests
 }
 ```
 
-- `400 Bad Request`
-  - Validation failed or captain with email already exists. Example:
+Validation error (400 Bad Request):
 
 ```json
-{ "message": "Captain with this email already exists" }
+{
+  "errors": [
+    { "msg": "Invalid email", "param": "email", "location": "body" }
+  ]
+}
 ```
 
-- `500 Internal Server Error`
-  - Unexpected server error. Example:
+Conflict / already exists (400 Bad Request):
 
 ```json
-{ "error": "<error message>" }
+{
+  "message": "Captain with this email already exists" // when email uniqueness fails
+}
 ```
 
-#### Example curl
+Server error (500 Internal Server Error):
 
-```bash
-curl -X POST http://localhost:3000/captains/register \
-  -H "Content-Type: application/json" \
-  -d '{"fullname":{"firstname":"John","lastname":"Doe"},"email":"john.doe@example.com","password":"secret123","vehicle":{"color":"red","plate":"ABC123","capacity":4,"vehicleType":"car"}}'
+```json
+{
+  "error": "<error message>"
+}
 ```
+
 
 #### Notes
-- `email` and `vehicle.plate` are stored as unique fields.
-- The model generates a JWT using `JWT_SECRET`; ensure it's set in environment variables.
+- `email` and `vehicle.plate` are unique in the database.
+- The server generates a JWT using `JWT_SECRET`; ensure it's set in environment variables.
 
 
