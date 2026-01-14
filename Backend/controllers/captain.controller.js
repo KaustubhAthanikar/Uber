@@ -60,10 +60,26 @@ module.exports.getCaptainProfile = async (req, res) => {
     res.status(200).json(req.captain);
 }
 
-module.exports.logoutCaptain = async (req, res, next) => {
-   
-    const token = req.cookies?.token || (req.headers.authorization && req.headers.authorization.split(" ")[1]);
-    await blacklistToken.create({token});
-    res.clearCookie("token");
-    res.status(200).json({message:"Logged out successfully"});
-}
+module.exports.logoutCaptain = async (req, res) => {
+    try {
+        const token =
+            req.cookies?.token ||
+            (req.headers.authorization && req.headers.authorization.split(" ")[1]);
+
+        if (!token) {
+            return res.status(400).json({ message: "No token provided" });
+        }
+
+        const existing = await blacklistToken.findOne({ token });
+
+        if (!existing) {
+            await blacklistToken.create({ token });
+        }
+
+        res.clearCookie("token");
+        res.status(200).json({ message: "Logged out successfully" });
+    } catch (error) {
+        console.error("Logout error:", error);
+        res.status(500).json({ message: "Logout failed" });
+    }
+};

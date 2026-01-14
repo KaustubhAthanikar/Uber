@@ -1,44 +1,44 @@
-import React,{Children, useEffect, useContext, useState} from 'react'
-import { useNavigate } from 'react-router-dom'
+import React, { useEffect, useContext, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { CaptainDataContext } from '../context/captainContext';
 
-const CaptainProtectWrapper = ({children}) => {
-    const token = localStorage.getItem('token');
-    const navigate = useNavigate();
-    const {captain, setCaptain} = useContext(CaptainDataContext);
-    const [isLoading,setIsLoading]=useState(true);
-    
-    useEffect(()=>{
-        if(!token)
-        navigate('/captain-login');
-    
-    },[token]);
+const CaptainProtectWrapper = ({ children }) => {
+  const token = localStorage.getItem('token');
+  const navigate = useNavigate();
+  const { setCaptain } = useContext(CaptainDataContext);
+  const [isLoading, setIsLoading] = useState(true);
 
-    
-
-    axios.get(`${import.meta.env.VITE_BASE_URL}/captains/profile`,{
-        headers:{
-            Authorization:`Bearer ${token}`
-        }
-    }).then((response)=>{   
-        if(response.status===200){
-            setCaptain(response.data.captain);
-            setIsLoading(false);
-        }
-    }).catch(err=>{
-        console.log(err);
-        localStorage.removeItem('token');
-        navigate('/captain-login');
-    });
-    if(isLoading){
-        return <div>Loading...</div>
+  useEffect(() => {
+    if (!token) {
+      navigate('/captain-login');
+      return;
     }
-  return (
-    <>
-      {children};
-    </>
-  )
-}
+
+    axios.get(`${import.meta.env.VITE_BASE_URL}/captains/profile`, {
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    })
+    .then((response) => {
+      if (response.status === 200) {
+        setCaptain(response.data.captain);
+        setIsLoading(false);
+      }
+    })
+    .catch((err) => {
+      console.log(err);
+      localStorage.removeItem('token');
+      navigate('/captain-login');
+    });
+
+  }, [token]);
+
+  if (isLoading) {
+    return <div>Loading...</div>;
+  }
+
+  return <>{children}</>;
+};
 
 export default CaptainProtectWrapper;

@@ -1,11 +1,15 @@
-import React, { useEffect } from 'react'
-import axios from 'axios'
-import { useNavigate } from 'react-router-dom'
+import React, { useEffect, useRef } from 'react';
+import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
 
 const CaptainLogout = () => {
   const navigate = useNavigate();
+  const called = useRef(false);
 
   useEffect(() => {
+    if (called.current) return;
+    called.current = true;
+
     const token = localStorage.getItem('token');
 
     axios.post(
@@ -22,7 +26,6 @@ const CaptainLogout = () => {
       navigate('/captain-login');
     })
     .catch(() => {
-      // even if logout fails, force logout on frontend
       localStorage.removeItem('token');
       navigate('/captain-login');
     });
