@@ -2,6 +2,8 @@ const captainModel = require("../models/captain.model");
 const captainService = require("../services/captain.services");
 const { validationResult } = require("express-validator");
 const blacklistToken = require("../models/blacklistToken.model");
+const jwt = require("jsonwebtoken");
+
 
 module.exports.registerCaptain = async (req, res) => {
     const errors = validationResult(req);
@@ -48,6 +50,8 @@ module.exports.loginCaptain = async (req, res) => {
         if (!isMatch) {
             return res.status(401).json({ message: "Invalid email or password" });
         }
+        captain.status = "active";
+        await captain.save();
         const token = captain.generateAuthToken();
         res.cookie("token", token);
         res.status(200).json({ token, captain });
@@ -75,6 +79,9 @@ module.exports.logoutCaptain = async (req, res) => {
         if (!existing) {
             await blacklistToken.create({ token });
         }
+
+        req.captain.status = "inactive";
+        await req.captain.save();
 
         res.clearCookie("token");
         res.status(200).json({ message: "Logged out successfully" });

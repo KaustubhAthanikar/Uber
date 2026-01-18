@@ -1,11 +1,14 @@
-const http = require('http');
-const app = require('./app');
-const port = process.env.PORT || 3000;
-
+const http = require("http");
+const app = require("./app"); 
+const { initializeSocket } = require("./socket"); // adjust path if needed
 
 const server = http.createServer(app);
 
+// Initialize socket.io
+initializeSocket(server);
 
-server.listen(port,()=>{
-    console.log(`Server is listening on port ${port}`)
+const PORT = process.env.PORT || 4000;
+
+server.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
 });

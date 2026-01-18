@@ -1,7 +1,26 @@
 import React from 'react'
 import { Link } from 'react-router-dom';
-
+import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
 const FinishRide = (props) => {
+    const navigate = useNavigate()
+    async function endRide() {
+        const response = await axios.post(`${import.meta.env.VITE_BASE_URL}/rides/end-ride`, {
+
+            rideId: props.ride._id
+
+
+        }, {
+            headers: {
+                Authorization: `Bearer ${localStorage.getItem('token')}`
+            }
+        })
+
+        if (response.status === 200) {
+            navigate('/captain-home')
+        }
+
+    }
   return (
     <div className='h-[90%]'>
             <h5 className='p-1 text-center absolute top-0  w-[93%]'
@@ -13,7 +32,7 @@ const FinishRide = (props) => {
             <div className='border-2 flex items-center justify-between mt-4 border-yellow-400 p-4 rounded-lg'>
                 <div className='flex items-center gap-3 '>
                     <img className='h-12 w-12 rounded-full object-cover' src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8M3x8cmFuZG9tJTIwcGVvcGxlfGVufDB8fDB8fHww" alt="" />
-                    <h2 className='text-xl font-medium'>Harsh Patel</h2>
+                    <h2 className='text-xl font-medium'>{props.ride?.user.fullname.firstname}</h2>
 
                 </div>
                 <h5 className='text-lg font-semibold'>2.2Km</h5>
@@ -25,20 +44,20 @@ const FinishRide = (props) => {
                         <h4><i className="text-lg ri-map-pin-line"></i></h4>
                         <div>
                             <h3 className='text-lg font-medium'>562/11-A</h3>
-                            <p className='text-gray-600 text-sm -mt-1'> Kalpavruksha Society Jawalkar Nagar Pimple Gurav,Pune</p>
+                            <p className='text-gray-600 text-sm -mt-1'> {props.ride?.pickup}</p>
                         </div>
                     </div>
                     <div className='flex items-center gap-3 p-3 border-b-2 border-gray-200'>
                         <h4><i className="text-lg ri-map-pin-line"></i></h4>
                         <div>
                             <h3 className='text-lg font-medium'>562/11-A</h3>
-                            <p className='text-gray-600 text-sm -mt-1'> Kalpavruksha Society Jawalkar Nagar Pimple Gurav,Pune</p>
+                            <p className='text-gray-600 text-sm -mt-1'> {props.ride?.destination}</p>
                         </div>
                     </div>
                     <div className='flex items-center gap-3 p-3 '>
                         <h4 className='text-xl'><i className="ri-money-rupee-circle-line"></i></h4>
                         <div>
-                            <h3 className='text-lg font-medium'>₹193.20</h3>
+                            <h3 className='text-lg font-medium'>₹{props.ride?.fare}</h3>
                             <p className='text-gray-600 text-sm -mt-1'>Cash</p>
                         </div>
                     </div>
@@ -46,7 +65,7 @@ const FinishRide = (props) => {
                 </div>
                 <div className='mt-10 w-full'>
     
-                        <Link to='/captain-home' className='w-full flex justify-center mt-3 bg-green-500 text-white font-semibold p-2 rounded-lg'>Finish Ride</Link>
+                        <button onClick={endRide}  className='w-full flex justify-center mt-3 bg-green-500 text-white font-semibold p-2 rounded-lg'>Finish Ride</button>
                         
                 </div>
             </div>

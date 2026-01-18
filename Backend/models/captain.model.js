@@ -56,14 +56,18 @@ const captainSchema = new mongoose.Schema({
             enum:['car','bike','auto']
         }
     },
-    location:{
-        lat:{
-            type:Number,
-        },
-        lon:{
-            type:Number
-        }
+    location: {
+    type: {
+        type: String,
+        enum: ['Point'],
+        default: 'Point'
+    },
+    coordinates: {
+        type: [Number], // [lng, lat]
+        default:[0,0]
     }
+}
+
 
 });
 
@@ -78,6 +82,9 @@ captainSchema.methods.comparePassword = async function(password){
 captainSchema.statics.hashPassword = async function(password){
     return await bcrypt.hash(password,10)
 }
+
+captainSchema.index({ location: "2dsphere" });
+
 const captainModel = mongoose.model('captain',captainSchema);
 
 module.exports = captainModel;

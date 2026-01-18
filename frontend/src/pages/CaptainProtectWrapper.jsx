@@ -1,12 +1,12 @@
 import React, { useEffect, useContext, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import { CaptainDataContext } from '../context/captainContext';
+import { CaptainDataContext } from '../context/CaptainContext';
 
 const CaptainProtectWrapper = ({ children }) => {
   const token = localStorage.getItem('token');
   const navigate = useNavigate();
-  const { setCaptain } = useContext(CaptainDataContext);
+  const { updateCaptain } = useContext(CaptainDataContext);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -22,13 +22,12 @@ const CaptainProtectWrapper = ({ children }) => {
     })
     .then((response) => {
       if (response.status === 200) {
-        setCaptain(response.data.captain);
+        updateCaptain(response.data);
         setIsLoading(false);
       }
     })
     .catch((err) => {
-      console.log(err);
-      localStorage.removeItem('token');
+      console.log("Profile fetch failed:", err);
       navigate('/captain-login');
     });
 
