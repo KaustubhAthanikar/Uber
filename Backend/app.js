@@ -20,6 +20,9 @@ app.use(cors({
   credentials: true
 }));(cookieParser());
 
+app.options("*", cors());
+
+
 app.use(express.urlencoded({extended:true}));
 
 
