@@ -15,7 +15,7 @@ app.use(express.json());
 app.use(cors({
   origin: [
     "http://localhost:5173",
-    "https://kl28zf9q-5173.inc1.devtunnels.ms"
+    "https://uber-95acy9x9h-kaustubh-athanikars-projects.vercel.app"
   ],
   credentials: true
 }));(cookieParser());
