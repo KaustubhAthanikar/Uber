@@ -20,16 +20,21 @@ const UserLogin = () => {
             password:password
         }
 
-        const response = await axios.post(`${import.meta.env.VITE_BASE_URL}/users/login`, userData);
-        if(response.status === 200){
-            const data = response.data;
-            setUser(data.user);
-            localStorage.setItem('token', data.token);
-            navigate('/home');
+        try {
+            const response = await axios.post(`${import.meta.env.VITE_BASE_URL}/users/login`, userData);
+            if(response.status === 200){
+                const data = response.data;
+                setUser(data.user);
+                localStorage.setItem('token', data.token);
+                navigate('/home');
+            }
+        } catch (error) {
+            console.error("Login failed:", error.response?.data || error.message);
+            alert(error.response?.data?.message || "Invalid email or password");
+        } finally {
+            setEmail('');
+            setPassword('');
         }
-        
-        setEmail('');
-        setPassword('');
     }
   return (
     <div className='p-7 h-screen flex flex-col justify-between'>

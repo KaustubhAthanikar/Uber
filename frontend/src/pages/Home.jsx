@@ -10,7 +10,7 @@ import WaitingForDriver from '../components/WaitingForDriver';
 import axios from "axios";
 import { SocketContext } from '../context/SocketContext';
 import {UserDataContext} from '../context/UserContext';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import LiveTracking from '../components/LiveTracking';
 
 const Home = () => {
@@ -52,15 +52,30 @@ const Home = () => {
     userId: user._id
   });
 
-
-
 }, [user, socket]);
 
-socket.on('ride-confirmed',ride =>{
-  setVehicleFound(false);
-  setWaitingForDriver(true);
-  setrRide(ride);
-})
+  useEffect(() => {
+    if (!socket) return;
+
+    const handleRideConfirmed = (ride) => {
+      setVehicleFound(false);
+      setWaitingForDriver(true);
+      setrRide(ride);
+    };
+
+    const handleRideStarted = (ride) => {
+      setWaitingForDriver(false);
+      navigate('/ride', { state: { ride } });
+    };
+
+    socket.on('ride-confirmed', handleRideConfirmed);
+    socket.on('ride-started', handleRideStarted);
+
+    return () => {
+      socket.off('ride-confirmed', handleRideConfirmed);
+      socket.off('ride-started', handleRideStarted);
+    };
+  }, [socket, navigate]);
 
 
   const submitHandler = (e) => {
@@ -227,14 +242,13 @@ socket.on('ride-confirmed',ride =>{
     }
   }
   
-  socket.on('ride-started',ride=>{
-    setWaitingForDriver(false),
-    navigate('/ride',{state:{ride}})
 
-  })
 
   return (
     <div className="h-screen relative overflow-hidden">
+      <Link to='/user/logout' className='fixed right-5 top-5 h-10 w-10 bg-white flex items-center justify-center rounded-full shadow-lg z-50'>
+        <i className="ri-logout-box-r-line text-lg font-semibold"></i>
+      </Link>
       <img
         className="w-16 absolute left-5 top-5"
         src="https://upload.wikimedia.org/wikipedia/commons/c/cc/Uber_logo_2018.png"

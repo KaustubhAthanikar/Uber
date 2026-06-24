@@ -146,7 +146,7 @@ useEffect(() => {
     <div className='h-screen'>
       <div className='fixed p-3 top-0 flex items-center justify-between w-screen'>
         <img className='w-16' src="https://upload.wikimedia.org/wikipedia/commons/c/cc/Uber_logo_2018.png" alt="" />
-        <Link to='/captain-home' className=' h-10 w-10 bg-white flex items-center justify-center rounded-full'>
+        <Link to='/captain/logout' className=' h-10 w-10 bg-white flex items-center justify-center rounded-full'>
           <i className="ri-logout-box-r-line"></i>
         </Link>
       </div>

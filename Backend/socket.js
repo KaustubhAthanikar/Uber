@@ -35,9 +35,6 @@ function initializeSocket(server) {
             if (!location || !location.coordinates || location.coordinates.length !== 2) {
                 return socket.emit('error', { message: 'Invalid location data' });
             }
-            {
-                return socket.emit('error', { message: 'Invalid location data' });
-            }
 
             await captainModel.findByIdAndUpdate(userId, {
                 location: {

@@ -91,7 +91,7 @@ module.exports.confirmRide = async ({
         _id: rideId
     }, {
         status: 'accepted',
-        captain: captain._id
+        captain: captain._id || captain
     })
 
     const ride = await rideModel.findOne({

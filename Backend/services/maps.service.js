@@ -108,31 +108,4 @@ module.exports.getCaptainsInTheRadius = async (lat, lng, radiusInKm) => {
         console.error("Error finding captains in radius:", err);
         throw err;
     }
-};
-
-
-module.exports.getCaptainsInTheRadius = async (lat, lng, radiusInKm) => {
-    try {
-
-        //radius in km
-        
-        const captains = await captainModel.find({
-            status: 'active',
-            location: {
-                $geoWithin: {
-                    $centerSphere: [
-                        [lng, lat],   
-                        radiusInKm / 6378 // Earth radius in km
-                    ]
-                }
-            }
-        });
-        console.log("Matched captains:", captains.length);
-
-
-        return captains;
-    } catch (err) {
-        console.error("Error finding captains in radius:", err);
-        throw err;
-    }
-};
+};

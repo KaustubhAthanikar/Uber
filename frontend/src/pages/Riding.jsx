@@ -12,9 +12,19 @@ const Riding = () => {
 
     const {socket} = useContext(SocketContext)
 
-    socket.on("ride-ended", () => {
-        navigate('/home')
-    })
+    useEffect(() => {
+        if (!socket) return;
+
+        const handleRideEnded = () => {
+            navigate('/home')
+        };
+
+        socket.on("ride-ended", handleRideEnded);
+
+        return () => {
+            socket.off("ride-ended", handleRideEnded);
+        };
+    }, [socket, navigate]);
 
     return (
         <div className='h-screen'>

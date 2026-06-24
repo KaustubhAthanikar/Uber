@@ -6,8 +6,8 @@ const authMiddleware = require('../middlewares/auth.middleware');
 
 router.post('/create',
     authMiddleware.authUser,
-    body('pickup').isString().isLength({ min: 1 }).withMessage('Pickup must be at least 3 characters'),
-    body('destination').isString().isLength({ min: 1 }).withMessage('Destination must be at least 3 characters'),
+    body('pickup').isString().isLength({ min: 3 }).withMessage('Pickup must be at least 3 characters'),
+    body('destination').isString().isLength({ min: 3 }).withMessage('Destination must be at least 3 characters'),
     body('vehicleType').isIn(['car', 'bike', 'auto']).withMessage('Invalid vehicle type'),
     rideController.createRide
 );
@@ -39,10 +39,6 @@ router.post(
     rideController.startRide
 );
 
-router.post('/end-ride',
-    authMiddleware.authCaptain,
-    body('rideId').isMongoId().withMessage('Invalid ride id'),
-    rideController.endRide
-)
+
 
 module.exports = router;

@@ -22,7 +22,7 @@ app.use(cors({
   credentials: true
 }));
 
-(cookieParser());
+app.use(cookieParser());
 
 app.use(express.urlencoded({extended:true}));
 

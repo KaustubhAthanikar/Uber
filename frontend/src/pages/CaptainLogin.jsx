@@ -18,16 +18,22 @@ const CaptainLogin = () => {
                 email:email,
                 password:password
             }
-            const response = await axios.post(`${import.meta.env.VITE_BASE_URL}/captains/login`, Captain);
+            try {
+                const response = await axios.post(`${import.meta.env.VITE_BASE_URL}/captains/login`, Captain);
 
-            if (response.status === 200) {
-                const data = response.data;
-                updateCaptain(data.captain);   
-                localStorage.setItem('token', data.token);
-                navigate('/captain-home');
+                if (response.status === 200) {
+                    const data = response.data;
+                    updateCaptain(data.captain);   
+                    localStorage.setItem('token', data.token);
+                    navigate('/captain-home');
+                }
+            } catch (error) {
+                console.error("Captain login failed:", error.response?.data || error.message);
+                alert(error.response?.data?.message || "Invalid email or password");
+            } finally {
+                setEmail('');
+                setPassword('');
             }
-            setEmail('');
-            setPassword('');
         }
   return (
     <div className='p-7 h-screen flex flex-col justify-between'>

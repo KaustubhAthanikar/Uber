@@ -26,20 +26,24 @@ const UserSignUp = () => {
             email: email,
             password: password
         }
-        const response = await axios.post(`${import.meta.env.VITE_BASE_URL}/users/register`, newUser);
+        try {
+            const response = await axios.post(`${import.meta.env.VITE_BASE_URL}/users/register`, newUser);
 
-        if(response.status === 201){
-
-            const data = response.data;
-            setUser(data.user);
-            localStorage.setItem('token', data.token);
-            navigate('/home');
-
+            if(response.status === 201){
+                const data = response.data;
+                setUser(data.user);
+                localStorage.setItem('token', data.token);
+                navigate('/home');
+            }
+        } catch (error) {
+            console.error("Signup failed:", error.response?.data || error.message);
+            alert(error.response?.data?.message || "Signup failed. Please check your inputs.");
+        } finally {
+            setFirstName('');
+            setLastName('');
+            setEmail('');
+            setPassword('');
         }
-        setFirstName('');
-        setLastName('');
-        setEmail('');
-        setPassword('');
     }
     return (
         <div className='p-7 h-screen flex flex-col '>
